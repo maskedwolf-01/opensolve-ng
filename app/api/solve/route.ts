@@ -1,7 +1,11 @@
+// app/api/solve/route.ts
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Safeguard max payload to avoid server crash and speed up processing
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
 
 export async function POST(req: Request) {
   try {
@@ -31,8 +35,11 @@ export async function POST(req: Request) {
 
     const currentParts: any[] = [{ text: prompt }];
 
-    // Handle mobile/PC file attachments safely
+    // Safe File validation
     if (file && file.size > 0) {
+      if (file.size > MAX_FILE_SIZE) {
+         return NextResponse.json({ error: 'File size exceeds 5MB limit.' }, { status: 400 });
+      }
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       currentParts.push({
