@@ -1,51 +1,54 @@
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../utils/supabaseClient';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const imageFile = formData.get('image') as File;
-    const prompt = formData.get('prompt') as string;
+    const imageFile = formData.get('image') as File | null;
+    const prompt = formData.get('prompt') as string || "Solve this step-by-step.";
+    const historyParam = formData.get('history') as string;
+    const history = historyParam ? JSON.parse(historyParam) : [];
 
-    if (!imageFile) {
-      return NextResponse.json({ error: 'No image provided.' }, { status: 400 });
+    // Construct the contents payload for Gemma 4 multimodal reasoning
+    const contents: any[] = [];
+
+    // Add prior conversation history if available
+    for (const h of history) {
+      contents.push({
+        role: h.role === 'user' ? 'user' : 'model',
+        parts: [{ text: h.content }]
+      });
     }
 
-    const arrayBuffer = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const mimeType = imageFile.type;
-    
-    // Call Gemma 4 Multimodal API
-    const response = await ai.models.generateContent({
-      model: "gemma-4-26b-a4b-it",
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { inlineData: { data: buffer.toString('base64'), mimeType } },
-            { text: prompt || "Solve this handwritten past question step-by-step." }
-          ]
+    // Build the current user message parts
+    const currentParts: any[] = [{ text: prompt }];
+
+    if (imageFile && imageFile.size > 0) {
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      currentParts.push({
+        inlineData: {
+          data: buffer.toString('base64'),
+          mimeType: imageFile.type
         }
-      ]
+      });
+    }
+
+    contents.push({
+      role: 'user',
+      parts: currentParts
     });
 
-    const solutionText = response.text;
+    const response = await ai.models.generateContent({
+      model: "gemma-4-26b-a4b-it",
+      contents: contents,
+    });
 
-    // Log solution to Supabase vault securely on backend
-    const { error: dbError } = await supabase
-      .from('pq_solutions')
-      .insert([{ solution_text: solutionText }]);
-
-    if (dbError) {
-      console.error("Supabase Log Error:", dbError.message);
-    }
-
-    return NextResponse.json({ solution: solutionText });
-  } catch (error) {
-    console.error("API Route Error:", error);
-    return NextResponse.json({ error: 'Failed to process image with Gemma 4.' }, { status: 500 });
+    return NextResponse.json({ reply: response.text });
+  } catch (error: any) {
+    console.error("Gemma 4 API Error:", error);
+    return NextResponse.json({ error: 'Failed to process request with Gemma 4.' }, { status: 500 });
   }
 }
