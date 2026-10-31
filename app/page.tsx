@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Github } from 'lucide-react';
+import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -48,7 +48,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 items-center">
              <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="px-4 py-2 bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
-               <Github className="w-4 h-4" /> Repository
+               View Repository
              </a>
           </div>
         </div>
