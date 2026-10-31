@@ -1,193 +1,191 @@
 "use client";
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, ArrowLeft, Loader2, BookOpen, MessageSquare, Send } from 'lucide-react';
+import { Terminal, UploadCloud, FileText, Send, ArrowLeft, Loader2, Cpu, Sparkles, User, X } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 export default function SolveWorkspace() {
   const [file, setFile] = useState<File | null>(null);
-  const [prompt, setPrompt] = useState('Analyze this document, extract the core questions or concepts, and provide a clear, comprehensive, step-by-step breakdown or solution.');
-  const [solution, setSolution] = useState('');
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (solution) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [solution]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
     if (selectedFile) {
-      setPreviewUrl(URL.createObjectURL(selectedFile));
-      setSolution('');
+      if (selectedFile.type.startsWith('image/')) {
+        setPreviewUrl(URL.createObjectURL(selectedFile));
+      } else {
+        setPreviewUrl(null); // PDF or doc icon placeholder
+      }
     } else {
       setPreviewUrl(null);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
-    setLoading(true);
-    setSolution('');
+  const handleSend = async () => {
+    if ((!input.trim() && !file) || loading) return;
+
+    const userMsgText = input.trim() || (file ? `Analyze this attached file: ${file.name}` : '');
+    const newMessages = [...messages, { role: 'user', text: userMsgText, fileName: file?.name }];
     
+    setMessages(newMessages);
+    setInput('');
+    setLoading(true);
+
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('prompt', prompt);
+    if (file) formData.append('file', file);
+    formData.append('prompt', userMsgText);
+    formData.append('history', JSON.stringify(messages.map(m => ({ role: m.role, content: m.text }))));
 
     try {
       const res = await fetch('/api/solve', { method: 'POST', body: formData });
       const data = await res.json();
-      setSolution(data.solution || data.error);
+      
+      const reply = data.reply || data.error || "An error occurred with Gemma 4.";
+      setMessages([...newMessages, { role: 'ai', text: reply }]);
     } catch (err) {
-      setSolution("An error occurred connecting to the Gemma 4 engine. Please check your network and try again.");
+      setMessages([...newMessages, { role: 'ai', text: "⚠️ Network error connecting to Gemma 4 engine." }]);
     }
+
     setLoading(false);
+    // Keep the file attached for multi-turn chat context unless cleared manually, or clear it out.
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col selection:bg-blue-500/30">
       
       {/* NAVBAR */}
       <nav className="sticky top-0 w-full z-40 backdrop-blur-xl border-b border-zinc-800 bg-zinc-950/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
              <Link href="/" className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-zinc-100">
                <ArrowLeft className="w-5 h-5" />
              </Link>
-             <div className="w-px h-6 bg-zinc-800 hidden sm:block"></div>
-             <div className="flex items-center gap-3">
-               <div className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
-                 <Terminal className="w-5 h-5 text-zinc-950" />
-               </div>
-               <span className="text-lg sm:text-xl font-bold tracking-tight text-zinc-100 font-mono">OpenSolve Workspace</span>
+             <div className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
+               <Terminal className="w-5 h-5 text-zinc-950" />
              </div>
+             <span className="text-base sm:text-lg font-bold tracking-tight text-zinc-100 font-mono">OpenSolve NG</span>
           </div>
           <div className="flex items-center gap-2 text-xs font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full">
-            <Cpu className="w-3 h-3" /> <span className="hidden sm:inline">Gemma 4 Multimodal</span> Active
+            <Cpu className="w-3 h-3" /> Gemma 4 Multimodal
           </div>
         </div>
       </nav>
 
-      {/* MAIN CONTAINER */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 grid lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+      {/* CHAT CONTAINER */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col justify-between">
         
-        {/* LEFT COLUMN: UPLOAD & INTERACTIVE CONTROLS */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-           
-           {/* IMAGE UPLOADER CARD */}
-           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
-              <h2 className="text-base sm:text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
-                 <UploadCloud className="w-5 h-5 text-zinc-400" /> Source Material
-              </h2>
-              
-              <label className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl cursor-pointer bg-zinc-950/50 transition-all group mb-4 relative overflow-hidden">
-                {previewUrl ? (
-                   <img src={previewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-20 transition-opacity" />
-                ) : null}
-                <div className="flex flex-col items-center gap-3 relative z-10 text-center">
-                  <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 group-hover:scale-105 transition-transform">
-                    <FileText className="w-6 h-6" />
+        {/* MESSAGES LIST */}
+        <div className="flex-1 overflow-y-auto space-y-6 pb-28 custom-scrollbar">
+          {messages.length === 0 ? (
+            <div className="h-[60vh] flex flex-col items-center justify-center text-center px-4">
+              <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-4 text-blue-400">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-zinc-100">What are we solving today?</h1>
+              <p className="text-zinc-400 text-sm max-w-md mt-2 leading-relaxed">
+                Upload any past question image, code file, or syllabus PDF. Ask questions, request deep breakdowns, and chat live with Gemma 4.
+              </p>
+            </div>
+          ) : (
+            messages.map((msg, idx) => (
+              <div key={idx} className={`flex gap-3 sm:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {msg.role === 'ai' && (
+                  <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Cpu className="w-4 h-4 text-blue-400" />
                   </div>
-                  <div>
-                    <span className="block font-medium text-zinc-100 text-sm sm:text-base">Upload Image / Handout</span>
-                    <span className="text-xs text-zinc-500 mt-1 block">Supports math, code, text, or diagrams</span>
+                )}
+                <div className={`p-4 sm:p-5 rounded-2xl text-sm sm:text-base max-w-[90%] sm:max-w-[80%] shadow-lg ${
+                  msg.role === 'ai' 
+                    ? 'bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-sm' 
+                    : 'bg-zinc-100 text-zinc-950 rounded-tr-sm font-medium'
+                }`}>
+                  {msg.fileName && (
+                    <div className="mb-3 p-2 bg-zinc-950/40 rounded-lg border border-zinc-800 text-xs font-mono flex items-center gap-2 text-zinc-300">
+                      <FileText className="w-4 h-4 text-blue-400" /> {msg.fileName}
+                    </div>
+                  )}
+                  {msg.role === 'ai' ? <MarkdownRenderer text={msg.text} /> : msg.text}
+                </div>
+                {msg.role === 'user' && (
+                  <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-4 h-4 text-zinc-300" />
                   </div>
-                </div>
-                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} required />
-              </label>
+                )}
+              </div>
+            ))
+          )}
 
-              {file && (
-                <div className="px-4 py-3 bg-blue-900/20 border border-blue-900/50 rounded-lg text-xs font-medium text-blue-400 truncate flex items-center justify-between">
-                  <span className="truncate pr-4">{file.name}</span>
-                  <span className="text-blue-500 opacity-70">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                </div>
-              )}
-           </div>
-
-           {/* INTERACTIVE PROMPT CARD */}
-           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
-              <h2 className="text-base sm:text-lg font-bold text-zinc-100 mb-4 flex items-center gap-2">
-                 <MessageSquare className="w-5 h-5 text-zinc-400" /> Instructions for Gemma
-              </h2>
-              <textarea 
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full h-32 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-300 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all resize-none mb-4 custom-scrollbar"
-                placeholder="Ask Gemma to explain, format, debug, or solve anything..."
-              />
-              <button 
-                onClick={handleSubmit} 
-                disabled={loading || !file} 
-                className={`w-full py-3.5 font-medium rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg ${loading || !file ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-800' : 'bg-zinc-100 text-zinc-950 hover:bg-white hover:shadow-white/10'}`}
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                {loading ? 'Gemma 4 is reasoning...' : 'Analyze with Gemma 4'}
-              </button>
-           </div>
-
+          {/* LOADING PROGRESS STATE */}
+          {loading && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-xs text-blue-400 bg-blue-500/10 px-4 py-2 rounded-full border border-blue-500/20 w-fit">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Gemma 4 is parsing layers & synthesizing solution...
+              </div>
+              <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
+                <div className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 h-full rounded-full animate-pulse w-3/4"></div>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
         </div>
 
-        {/* RIGHT COLUMN: FORMATTED OUTPUT & PROGRESS BAR */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-           <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-6 min-h-[550px] sm:min-h-[650px] flex flex-col shadow-xl">
-              
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800 pb-4 mb-6 gap-2">
-                 <h2 className="text-base sm:text-lg font-bold text-zinc-100 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-blue-500" /> Structured Response
-                 </h2>
-                 <div className="text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-md border border-zinc-800 self-start sm:self-auto">
-                    Model: gemma-4-26b-a4b-it
-                 </div>
+        {/* INPUT & FILE ATTACHMENT BAR */}
+        <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent p-4 z-30">
+          <div className="max-w-5xl mx-auto">
+            
+            {/* Attached File Preview Badge */}
+            {file && (
+              <div className="mb-2 flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg w-fit text-xs text-zinc-300">
+                {previewUrl ? <img src={previewUrl} alt="Thumb" className="w-5 h-5 object-cover rounded" /> : <FileText className="w-4 h-4 text-blue-400" />}
+                <span className="truncate max-w-[200px]">{file.name}</span>
+                <button onClick={() => { setFile(null); setPreviewUrl(null); }} className="text-zinc-500 hover:text-zinc-100 ml-2">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
+            )}
 
-              {/* PROGRESS BAR WHILE LOADING */}
-              {loading && (
-                <div className="w-full bg-zinc-950 rounded-full h-2 mb-6 overflow-hidden border border-zinc-800">
-                  <div className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 h-full rounded-full animate-pulse w-3/4"></div>
-                </div>
-              )}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-2 flex items-center gap-2 shadow-2xl">
+              <label className="p-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl cursor-pointer transition-colors">
+                <UploadCloud className="w-5 h-5" />
+                <input type="file" className="hidden" accept="image/*,.pdf" onChange={handleFileChange} />
+              </label>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
-                 {!solution && !loading && (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-500 opacity-60 py-24 sm:py-32 text-center px-4">
-                       <BookOpen className="w-12 h-12 mb-4 text-zinc-600" />
-                       <p className="font-semibold text-base sm:text-lg text-zinc-400">Ready for any question type</p>
-                       <p className="text-xs sm:text-sm max-w-sm mt-2 leading-relaxed">Upload any past question image, code snippet, or theory note, customize your instructions, and let Gemma 4 generate a detailed breakdown.</p>
-                    </div>
-                 )}
+              <input 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Ask Gemma anything or paste instructions..."
+                className="flex-1 bg-transparent border-none text-zinc-100 px-2 py-2 text-sm focus:outline-none placeholder:text-zinc-600"
+                disabled={loading}
+              />
 
-                 {loading && (
-                    <div className="space-y-6 py-6 px-2">
-                       <div className="flex items-center gap-3">
-                          <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
-                          <span className="text-sm font-medium text-zinc-400">Gemma 4 is parsing image layers & synthesizing solution...</span>
-                       </div>
-                       <div className="space-y-3 pt-4">
-                         <div className="h-4 w-full bg-zinc-800/80 rounded animate-pulse"></div>
-                         <div className="h-4 w-5/6 bg-zinc-800/60 rounded animate-pulse"></div>
-                         <div className="h-4 w-4/6 bg-zinc-800/40 rounded animate-pulse"></div>
-                       </div>
-                       <div className="space-y-3 pt-6">
-                         <div className="h-4 w-full bg-zinc-800/80 rounded animate-pulse"></div>
-                         <div className="h-4 w-[90%] bg-zinc-800/60 rounded animate-pulse"></div>
-                       </div>
-                    </div>
-                 )}
-
-                 {solution && (
-                    <div className="text-zinc-200 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap animate-fade-in font-normal bg-zinc-950/80 p-5 rounded-xl border border-zinc-800 shadow-inner">
-                       {solution}
-                    </div>
-                 )}
-                 <div ref={bottomRef} />
-              </div>
-
-           </div>
+              <button 
+                onClick={handleSend}
+                disabled={(!input.trim() && !file) || loading}
+                className={`p-3 rounded-xl transition-all flex items-center justify-center ${
+                  (input.trim() || file) && !loading 
+                    ? 'bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg' 
+                    : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                }`}
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              </button>
+            </div>
+            
+            <div className="text-center mt-2 text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+              Open-Source AI Engine • Powered by Gemma 4 Multimodal
+            </div>
+          </div>
         </div>
 
       </main>
