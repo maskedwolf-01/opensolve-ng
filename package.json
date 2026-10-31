@@ -10,7 +10,8 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@google/genai": "latest"
+    "@google/genai": "latest",
+    "lucide-react": "latest"
   },
   "devDependencies": {
     "typescript": "latest",
