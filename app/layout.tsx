@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: 'Nigeria\'s First Open-Source Multimodal Learning Platform. Solve handwritten past questions instantly.',
   keywords: ['Gemma 4', 'AI Tutor', 'Nigerian Universities', 'Past Questions', 'Open Source', 'Hacktoberfest'],
   authors: [{ name: 'Majeed Abdulwali' }],
+  metadataBase: new URL('https://opensolve-ng.vercel.app'),
   
   // Open Graph metadata (for WhatsApp, Discord, Facebook, LinkedIn)
   openGraph: {
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     siteName: 'OpenSolve NG',
     images: [
       {
-        url: '/og-image.jpg', 
+        url: 'https://opensolve-ng.vercel.app/og-image.jpg', 
         width: 1200,
         height: 630,
         alt: 'OpenSolve NG Powered by Gemma 4',
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OpenSolve NG | Multimodal AI Engine',
     description: 'Decode handwritten past questions instantly with Gemma 4.',
-    images: ['/og-image.jpg'],
+    images: ['https://opensolve-ng.vercel.app/og-image.jpg'],
   },
   
   // Favicon mapping
