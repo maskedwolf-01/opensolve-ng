@@ -34,14 +34,13 @@ export async function POST(req: Request) {
 
     const solutionText = response.text;
 
-    // Log solution to Supabase vault
+    // Log solution to Supabase vault securely on backend
     const { error: dbError } = await supabase
       .from('pq_solutions')
       .insert([{ solution_text: solutionText }]);
 
     if (dbError) {
-      console.error("Supabase Insertion Error:", dbError.message);
-      // We still return the solution to the user even if the DB log fails
+      console.error("Supabase Log Error:", dbError.message);
     }
 
     return NextResponse.json({ solution: solutionText });
