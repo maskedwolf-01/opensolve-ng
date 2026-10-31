@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { BrainCircuit, UploadCloud, ChevronRight } from 'lucide-react';
+import { BrainCircuit, UploadCloud, ChevronRight, ExternalLink } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -37,8 +37,8 @@ export default function Home() {
             <span className="text-2xl font-bold tracking-tight text-charcoal-100 font-serif">OpenSolve<span className="text-amethyst_smoke">.</span></span>
           </div>
           <div className="flex gap-4 items-center">
-             <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="text-charcoal-700 hover:text-amethyst_smoke text-sm font-medium transition-colors font-bold">
-               View on GitHub
+             <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="text-charcoal-700 hover:text-amethyst_smoke text-sm font-medium transition-colors font-bold flex items-center gap-2">
+               View Repository <ExternalLink className="w-4 h-4" />
              </a>
           </div>
         </div>
