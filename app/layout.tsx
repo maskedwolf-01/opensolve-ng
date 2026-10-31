@@ -1,6 +1,8 @@
+import './globals.css';
+
 export const metadata = {
-  title: 'OpenSolve NG',
-  description: 'Open-Source Gemma 4 Past Question Solver',
+  title: 'OpenSolve NG | Gemma 4 AI',
+  description: 'Open-Source Past Question Solver for Nigerian Universities',
 }
 
 export default function RootLayout({
