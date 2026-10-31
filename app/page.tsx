@@ -26,54 +26,111 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-ghost_white flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-pale_sky-200 overflow-hidden">
+    <main className="min-h-screen bg-white font-sans text-charcoal flex flex-col">
+      {/* Navbar Placeholder */}
+      <header className="flex justify-between items-center p-4 border-b border-gray-200 px-8">
+        <div className="font-bold text-xl text-charcoal-100 flex items-center gap-2">
+          <span className="text-amethyst_smoke text-2xl">⬡</span> OpenSolve NG
+        </div>
+        <div className="flex gap-4">
+          <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="px-4 py-2 text-sm font-semibold hover:bg-alice_blue rounded-md transition">GitHub</a>
+        </div>
+      </header>
+
+      {/* Hero Section matching Khan Academy layout */}
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto w-full px-8 py-16 gap-12 items-center">
         
-        <div className="bg-pale_sky-500 p-8 text-center">
-          <h1 className="text-4xl font-extrabold text-charcoal-100 tracking-tight mb-2">OpenSolve NG</h1>
-          <p className="text-charcoal-700 text-lg">Nigeria's First Open-Source Multimodal Learning Platform</p>
+        {/* Left Column: Copywriting */}
+        <div className="flex-1 text-left">
+          <h1 className="text-5xl lg:text-6xl font-extrabold text-charcoal-100 leading-tight mb-6">
+            Turn blurry past questions into <span className="italic">real</span> solutions.
+          </h1>
+          <p className="text-lg text-charcoal-700 mb-8 max-w-lg leading-relaxed">
+            OpenSolve NG helps Nigerian university students instantly transcribe and solve handwritten past questions using Gemma 4 multimodal AI. Keep pace with your studies and prepare for exams with step-by-step breakdowns.
+          </p>
         </div>
 
-        <div className="p-8">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="flex flex-col items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-amethyst_smoke-400 rounded-lg cursor-pointer bg-alice_blue hover:bg-pale_sky-100 transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <p className="mb-2 text-sm text-charcoal-600 font-semibold">Click to upload your Past Question</p>
-                  <p className="text-xs text-charcoal-400">PNG, JPG or JPEG (Max 5MB)</p>
+        {/* Right Column: Action Area replacing the Login Cards */}
+        <div className="flex-1 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4 text-charcoal-100">Get started</h2>
+          
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Upload Card */}
+            <label className="flex flex-col p-4 border border-gray-300 rounded-lg cursor-pointer bg-white hover:border-amethyst_smoke hover:shadow-md transition group">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="block font-bold text-charcoal-100 group-hover:text-amethyst_smoke">1. Upload Image</span>
+                  <span className="text-sm text-charcoal-600">Select a handwritten past question</span>
                 </div>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={(e) => setFile(e.target.files?.[0] || null)} 
-                  required 
-                />
-              </label>
-              {file && <p className="mt-3 text-sm text-sage_green-600 font-medium">Selected: {file.name}</p>}
-            </div>
+                <span className="text-amethyst_smoke font-bold">›</span>
+              </div>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={(e) => setFile(e.target.files?.[0] || null)} 
+                required 
+              />
+            </label>
 
+            {file && (
+              <div className="p-3 bg-alice_blue border border-pale_sky-200 rounded-lg text-sm font-medium text-cool_sky-200">
+                Selected: {file.name}
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button 
               type="submit" 
               disabled={loading || !file} 
-              className={`w-full py-4 rounded-lg font-bold text-white transition-all ${
-                loading ? 'bg-charcoal-400 cursor-not-allowed' : 'bg-amethyst_smoke hover:bg-amethyst_smoke-600 shadow-md'
+              className={`flex justify-between items-center p-4 border rounded-lg transition-all ${
+                loading || !file 
+                ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed' 
+                : 'border-amethyst_smoke bg-amethyst_smoke text-white hover:bg-amethyst_smoke-400 shadow-md'
               }`}
             >
-              {loading ? 'Gemma 4 is Analyzing...' : 'Solve Question with AI'}
+              <div className="text-left">
+                <span className="block font-bold">2. Analyze with AI</span>
+                <span className="text-sm opacity-90">{loading ? 'Processing via Gemini API...' : 'Generate step-by-step solution'}</span>
+              </div>
+              <span className="font-bold">›</span>
             </button>
           </form>
-
-          {solution && (
-            <div className="mt-8 p-6 bg-mint_cream rounded-xl border border-sage_green-300">
-              <h2 className="text-xl font-bold text-charcoal-100 mb-4">Gemma 4 Solution:</h2>
-              <div className="text-charcoal-700 whitespace-pre-wrap leading-relaxed">
-                {solution}
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Solution Rendering Area */}
+      {solution && (
+        <div className="max-w-5xl mx-auto w-full px-8 py-12 border-t border-gray-200">
+           <div className="p-8 bg-ghost_white rounded-xl border border-charcoal-800 shadow-sm">
+             <h2 className="text-2xl font-bold text-charcoal-100 mb-6 flex items-center gap-2">
+                <span className="text-amethyst_smoke">✦</span> Gemma 4 Solution
+             </h2>
+             <div className="text-charcoal-700 whitespace-pre-wrap leading-relaxed font-medium">
+               {solution}
+             </div>
+           </div>
+        </div>
+      )}
+
+      {/* Impact Stats matching Khan Academy layout */}
+      <div className="bg-ghost_white border-t border-b border-gray-200 py-12 mt-auto">
+        <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-12 md:gap-24 px-4 text-center">
+          <div>
+            <div className="text-3xl font-extrabold text-charcoal-100 mb-1">Gemma 4</div>
+            <div className="text-sm font-medium text-charcoal-600">Open-weights model</div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-charcoal-100 mb-1">Free</div>
+            <div className="text-sm font-medium text-charcoal-600">for Nigerian students</div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-charcoal-100 mb-1">Open Source</div>
+            <div className="text-sm font-medium text-charcoal-600">MIT Licensed</div>
+          </div>
+        </div>
+      </div>
+      
     </main>
   );
 }
