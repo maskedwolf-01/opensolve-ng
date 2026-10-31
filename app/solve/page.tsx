@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, ArrowLeft, Loader2, BookOpen } from 'lucide-react';
+import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, ArrowLeft, Loader2, BookOpen, Zap } from 'lucide-react';
 
 export default function SolveWorkspace() {
   const [file, setFile] = useState<File | null>(null);
