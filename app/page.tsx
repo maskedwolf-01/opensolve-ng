@@ -1,10 +1,11 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
-import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, BookOpen, ShieldCheck, Github, ArrowRight, Sparkles, Layers, Shield, CheckCircle2, Users } from 'lucide-react';
+import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, BookOpen, ShieldCheck, Github, ArrowRight, Sparkles, Layers, Shield, CheckCircle2, Users, MessageSquare, X } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
+  const [promptInput, setPromptInput] = useState(''); // NEW: Text input state
   const [solution, setSolution] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -26,12 +27,14 @@ const response = await ai.models.generateContent({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    // Allow submission if there is EITHER text OR a file
+    if (!promptInput.trim() && !file) return; 
     setLoading(true);
     
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('prompt', 'Solve this handwritten past question step-by-step. Break down the math or logic clearly.');
+    if (file) formData.append('file', file);
+    // Use user's typed text, or fallback to default if they only uploaded an image
+    formData.append('prompt', promptInput.trim() || 'Solve this handwritten past question step-by-step. Break down the math or logic clearly.');
 
     try {
       const res = await fetch('/api/solve', { method: 'POST', body: formData });
@@ -103,31 +106,49 @@ const response = await ai.models.generateContent({
             </h1>
             
             <p className="text-sm sm:text-lg text-zinc-400 mb-8 sm:mb-10 max-w-lg leading-relaxed font-light break-words">
-              The open-source multimodal engine for Nigerian universities. Upload blurry handouts and let Gemma 4 extract, format, and solve the logic step-by-step.
+              The open-source multimodal engine for Nigerian universities. Ask questions, upload blurry handouts, and let Gemma 4 extract, format, and solve the logic step-by-step.
             </p>
             
-            {/* UPLOADER */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800 backdrop-blur-sm box-border">
-              <label className="flex flex-col p-4 sm:p-6 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl cursor-pointer bg-zinc-950/50 transition-all group">
+            {/* INTERACTIVE UPLOADER & TEXT INPUT */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md bg-zinc-900/50 p-3 sm:p-4 rounded-2xl border border-zinc-800 backdrop-blur-sm box-border">
+              
+              {/* NEW: Text Input Field */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-blue-400" /> Ask Gemma a question (optional):
+                </label>
+                <textarea 
+                  value={promptInput}
+                  onChange={(e) => setPromptInput(e.target.value)}
+                  placeholder="e.g., Explain OSI layers or solve this logic puzzle..."
+                  className="w-full h-20 bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs sm:text-sm text-zinc-100 focus:outline-none focus:border-blue-500 transition-colors resize-none placeholder:text-zinc-600"
+                />
+              </div>
+
+              {/* File Uploader */}
+              <label className="flex flex-col p-3 sm:p-4 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl cursor-pointer bg-zinc-950/50 transition-all group">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className="p-2.5 sm:p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 group-hover:scale-105 transition-transform flex-shrink-0">
                     <UploadCloud className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
                     <span className="block font-medium text-zinc-100 text-sm sm:text-base truncate">Upload Past Question</span>
-                    <span className="text-xs text-zinc-500">PNG, JPG up to 5MB</span>
+                    <span className="text-[11px] text-zinc-500">PNG, JPG, or PDF up to 5MB</span>
                   </div>
                 </div>
-                <input type="file" className="hidden" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} required />
+                <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} />
               </label>
 
               {file && (
-                <div className="px-4 py-3 bg-blue-900/20 border border-blue-900/50 rounded-lg text-xs font-medium text-blue-400 truncate flex items-center gap-2">
-                  <FileText className="w-4 h-4 flex-shrink-0" /> <span className="truncate">{file.name}</span>
+                <div className="px-3 py-2 bg-blue-900/20 border border-blue-900/50 rounded-lg text-xs font-medium text-blue-400 truncate flex items-center justify-between">
+                  <span className="truncate flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 flex-shrink-0" /> {file.name}</span>
+                  <button type="button" onClick={() => setFile(null)} className="text-zinc-400 hover:text-white flex items-center gap-1 flex-shrink-0">
+                    <X className="w-3 h-3" /> Remove
+                  </button>
                 </div>
               )}
 
-              <button type="submit" disabled={loading || !file} className={`w-full py-3.5 font-medium rounded-xl flex items-center justify-center gap-2 transition-all text-sm ${loading || !file ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-800' : 'bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg hover:shadow-white/10'}`}>
+              <button type="submit" disabled={loading || (!promptInput.trim() && !file)} className={`w-full py-3.5 font-medium rounded-xl flex items-center justify-center gap-2 transition-all text-sm ${loading || (!promptInput.trim() && !file) ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-800' : 'bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg hover:shadow-white/10'}`}>
                 {loading ? 'Gemma 4 is analyzing...' : 'Generate Solution'} <ChevronRight className="w-4 h-4" />
               </button>
             </form>
@@ -176,15 +197,15 @@ const response = await ai.models.generateContent({
               <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-6 text-zinc-300 border border-zinc-700">
                 <UploadCloud className="w-6 h-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-zinc-100 mb-3">1. Snap & Upload</h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">Take a photo of your physical handout or screenshot a past question from WhatsApp. Drop it right into the platform.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-zinc-100 mb-3">1. Ask & Upload</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">Type a question or take a photo of your physical handout. Drop it right into the platform.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 sm:p-8 rounded-3xl min-w-0 overflow-hidden">
               <div className="w-12 h-12 bg-blue-900/20 rounded-xl flex items-center justify-center mb-6 text-blue-400 border border-blue-900/50">
                 <Cpu className="w-6 h-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-zinc-100 mb-3">2. Multimodal Processing</h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">The Gemma 4 open-weights model uses advanced optical character recognition and reasoning to transcribe the chaotic handwriting.</p>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">The Gemma 4 open-weights model uses advanced optical character recognition and reasoning to transcribe chaotic handwriting.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 sm:p-8 rounded-3xl min-w-0 overflow-hidden">
               <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-6 text-zinc-300 border border-zinc-700">
