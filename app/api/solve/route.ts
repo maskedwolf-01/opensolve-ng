@@ -6,15 +6,14 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const imageFile = formData.get('image') as File | null;
-    const prompt = formData.get('prompt') as string || "Solve this step-by-step.";
+    const file = formData.get('file') as File | null;
+    const prompt = formData.get('prompt') as string || "Analyze this document or image thoroughly.";
     const historyParam = formData.get('history') as string;
     const history = historyParam ? JSON.parse(historyParam) : [];
 
-    // Construct the contents payload for Gemma 4 multimodal reasoning
     const contents: any[] = [];
 
-    // Add prior conversation history if available
+    // Append prior conversation history
     for (const h of history) {
       contents.push({
         role: h.role === 'user' ? 'user' : 'model',
@@ -22,16 +21,15 @@ export async function POST(req: Request) {
       });
     }
 
-    // Build the current user message parts
     const currentParts: any[] = [{ text: prompt }];
 
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer();
+    if (file && file.size > 0) {
+      const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       currentParts.push({
         inlineData: {
           data: buffer.toString('base64'),
-          mimeType: imageFile.type
+          mimeType: file.type
         }
       });
     }
