@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
     const mimeType = imageFile.type;
     
+    // Call Gemma 4 Multimodal API
     const response = await ai.models.generateContent({
       model: "gemma-4-26b-a4b-it",
       contents: [
@@ -33,8 +34,15 @@ export async function POST(req: Request) {
 
     const solutionText = response.text;
 
-    // Save the solution to the Supabase community vault
-    await supabase.from('pq_solutions').insert([{ solution_text: solutionText }]);
+    // Log solution to Supabase vault
+    const { error: dbError } = await supabase
+      .from('pq_solutions')
+      .insert([{ solution_text: solutionText }]);
+
+    if (dbError) {
+      console.error("Supabase Insertion Error:", dbError.message);
+      // We still return the solution to the user even if the DB log fails
+    }
 
     return NextResponse.json({ solution: solutionText });
   } catch (error) {
