@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Github, Cpu, BookOpen, ShieldCheck, Zap } from 'lucide-react';
+import { Terminal, UploadCloud, ChevronRight, FileText, CheckCircle, Lightbulb, Cpu, BookOpen, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -37,7 +37,7 @@ export default function Home() {
         </p>
       </div>
 
-      {/* SUPERB NAVBAR */}
+      {/* NAVBAR */}
       <nav className="sticky top-0 w-full z-40 backdrop-blur-xl border-b border-zinc-800 bg-zinc-950/80">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 items-center">
              <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="px-4 py-2 bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shadow-sm">
-               <Github className="w-4 h-4" /> <span className="hidden sm:inline">Star on GitHub</span>
+               <span className="hidden sm:inline">Star on GitHub</span>
              </a>
           </div>
         </div>
@@ -66,7 +66,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div className="text-left animate-fade-in z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full">
-              <Zap className="w-3 h-3" /> Powered by Gemma 4
+              Powered by Gemma 4
             </div>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-zinc-100 leading-[1.1]">
               Decode handwritten <br/> past questions.
@@ -176,7 +176,7 @@ export default function Home() {
             </p>
             <ul className="space-y-4">
               <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium"><ShieldCheck className="w-5 h-5 text-blue-400" /> MIT Licensed Infrastructure</li>
-              <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium"><Code className="w-5 h-5 text-blue-400" /> Next.js App Router & Tailwind CSS</li>
+              <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium"><Terminal className="w-5 h-5 text-blue-400" /> Next.js App Router & Tailwind CSS</li>
               <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium"><BookOpen className="w-5 h-5 text-blue-400" /> Google Gen AI SDK integration</li>
             </ul>
           </div>
