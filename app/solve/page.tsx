@@ -53,7 +53,7 @@ const MarkdownRenderer = ({ text }: { text: string }) => {
     }
   }
   if (inTable) renderedContent.push(flushTable(lines.length));
-  return <div className="space-y-1 w-full overflow-x-hidden">{renderedContent}</div>;
+  return <div className="space-y-1 w-full overflow-hidden">{renderedContent}</div>;
 };
 
 export default function SolveWorkspace() {
@@ -149,7 +149,8 @@ export default function SolveWorkspace() {
                     <Cpu className="w-3.5 h-3.5 text-blue-400" />
                   </div>
                 )}
-                <div className={`p-3 sm:p-4 rounded-xl text-xs sm:text-sm max-w-[85%] sm:max-w-[80%] shadow-lg break-words box-border ${
+                {/* Added min-w-0 and overflow-hidden to prevent flex text clipping */}
+                <div className={`p-3 sm:p-4 rounded-xl text-xs sm:text-sm max-w-[85%] sm:max-w-[80%] min-w-0 overflow-hidden shadow-lg break-words box-border ${
                   msg.role === 'ai' 
                     ? 'bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-sm' 
                     : 'bg-zinc-100 text-zinc-950 rounded-tr-sm font-medium'
