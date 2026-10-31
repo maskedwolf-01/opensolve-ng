@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google"; 
 import "./globals.css";
@@ -28,7 +27,7 @@ export const metadata: Metadata = {
     siteName: 'OpenSolve NG',
     images: [
       {
-        url: '/og-image.png', // Save image_2.png to /public/og-image.png to trigger this preview!
+        url: '/og-image.jpg', 
         width: 1200,
         height: 630,
         alt: 'OpenSolve NG Powered by Gemma 4',
@@ -43,13 +42,13 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OpenSolve NG | Multimodal AI Engine',
     description: 'Decode handwritten past questions instantly with Gemma 4.',
-    images: ['/og-image.png'],
+    images: ['/og-image.jpg'],
   },
   
-  // Favicon mapping (Updated to use your favicon.jpg in /public!)
+  // Favicon mapping
   icons: {
     icon: [
-      { url: '/favicon.jpg', type: 'image/jpeg' }, // Directly triggers your uploaded file
+      { url: '/favicon.jpg', type: 'image/jpeg' },
     ],
     shortcut: '/favicon.jpg',
     apple: '/favicon.jpg',
@@ -64,7 +63,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-zinc-950 text-zinc-100 overflow-x-hidden">
       <head>
-        {/* Forces fallback support in older browsers for your newly added jpg icon */}
         <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/favicon.jpg" />
       </head>
