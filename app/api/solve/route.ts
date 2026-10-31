@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
-    const prompt = formData.get('prompt'] as string || "Analyze this document or image thoroughly.";
+    const prompt = formData.get('prompt') as string || "Analyze this document or image thoroughly.";
     const historyParam = formData.get('history') as string;
     const history = historyParam ? JSON.parse(historyParam) : [];
 
