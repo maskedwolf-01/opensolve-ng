@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OpenSolve NG | Multimodal AI Engine',
     description: 'Decode handwritten past questions instantly with Gemma 4.',
-    images: ['https://opensolve-ng.vercel.app/og-image.jpg'],
+    images: ['https://opensolve-ng.vercel.app/og-image.jpg'], 
   },
   
   icons: {
