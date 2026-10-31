@@ -30,13 +30,13 @@ const response = await ai.models.generateContent({
     setLoading(true);
     
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     formData.append('prompt', 'Solve this handwritten past question step-by-step. Break down the math or logic clearly.');
 
     try {
       const res = await fetch('/api/solve', { method: 'POST', body: formData });
       const data = await res.json();
-      setSolution(data.solution || data.error);
+      setSolution(data.reply || data.error || "An error occurred with Gemma 4.");
     } catch (err) {
       setSolution("An error occurred connecting to the AI.");
     }
