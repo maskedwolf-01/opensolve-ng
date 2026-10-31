@@ -25,6 +25,14 @@ export const metadata: Metadata = {
     description: 'Decode handwritten past questions instantly with Gemma 4. Upload your handouts and chat live with our open-source tutor.',
     url: 'https://opensolve-ng.vercel.app', 
     siteName: 'OpenSolve NG',
+    images: [
+      {
+        url: 'https://opensolve-ng.vercel.app/og-image.jpg', 
+        width: 1200,
+        height: 630,
+        alt: 'OpenSolve NG Powered by Gemma 4',
+      },
+    ],
     locale: 'en_NG',
     type: 'website',
   },
@@ -33,6 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OpenSolve NG | Multimodal AI Engine',
     description: 'Decode handwritten past questions instantly with Gemma 4.',
+    images: ['https://opensolve-ng.vercel.app/og-image.jpg'],
   },
   
   icons: {
