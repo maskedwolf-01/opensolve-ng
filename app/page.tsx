@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { BrainCircuit, Zap, Target, UploadCloud, ChevronRight, Github } from 'lucide-react';
+import { BrainCircuit, UploadCloud, ChevronRight } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -28,7 +28,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      {/* HEADER */}
       <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -38,14 +37,13 @@ export default function Home() {
             <span className="text-2xl font-bold tracking-tight text-charcoal-100 font-serif">OpenSolve<span className="text-amethyst_smoke">.</span></span>
           </div>
           <div className="flex gap-4 items-center">
-             <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="text-charcoal-700 hover:text-amethyst_smoke text-sm font-medium transition-colors flex items-center gap-2">
-               <Github className="w-5 h-5" /> GitHub Repo
+             <a href="https://github.com/maskedwolf-01/opensolve-ng" target="_blank" className="text-charcoal-700 hover:text-amethyst_smoke text-sm font-medium transition-colors font-bold">
+               View on GitHub
              </a>
           </div>
         </div>
       </header>
 
-      {/* HERO SECTION */}
       <section className="relative pt-20 pb-16 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           
@@ -92,7 +90,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SOLUTION RENDER AREA */}
       {solution && (
         <section className="max-w-5xl mx-auto w-full px-6 pb-20 z-20 relative">
            <div className="p-8 bg-white rounded-3xl border border-gray-200 shadow-xl">
@@ -106,7 +103,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* IMPACT STATS */}
       <section className="border-y border-gray-200 bg-white py-12">
         <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-12 md:gap-32 px-6 text-center">
           <div>
@@ -124,7 +120,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="mt-auto py-12 bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
